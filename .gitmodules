@@ -1,0 +1,3 @@
+[submodule "upstream/zxing-cpp"]
+	path = upstream/zxing-cpp
+	url = https://github.com/zxing-cpp/zxing-cpp.git
