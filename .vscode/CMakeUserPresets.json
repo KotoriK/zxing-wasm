@@ -1,0 +1,27 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Emscripten",
+            "binaryDir": "build",
+            "toolchainFile": "${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+            "environment": {
+                "CMAKE_CROSSCOMPILING_EMULATOR": "${EMSDK_NODE}",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": ""
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "Debug",
+            "configurePreset": "default",
+            "configuration": "Debug"
+        },
+        {
+            "name": "Release",
+            "configurePreset": "default",
+            "configuration": "Release"
+        }
+    ]
+}

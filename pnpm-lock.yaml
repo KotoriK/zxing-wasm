@@ -14,6 +14,13 @@ importers:
       vite-plugin-dts:
         specifier: ^4.4.0
         version: 4.4.0(rollup@4.29.1)(typescript@5.4.2)(vite@6.0.7)
+    devDependencies:
+      '@types/dom-mediacapture-transform':
+        specifier: ^0.1.10
+        version: 0.1.10
+      '@webgpu/types':
+        specifier: ^0.1.53
+        version: 0.1.53
 
 packages:
 
@@ -329,6 +336,12 @@ packages:
   '@types/argparse@1.0.38':
     resolution: {integrity: sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==}
 
+  '@types/dom-mediacapture-transform@0.1.10':
+    resolution: {integrity: sha512-zUxMN2iShu7p3Fz5sqfvLp93qW/3sLs+RwXWWOkMb969hsuoVqUUokqrENjXqTMNmEEcVXKoHuMMbIGcWyrVVA==}
+
+  '@types/dom-webcodecs@0.1.13':
+    resolution: {integrity: sha512-O5hkiFIcjjszPIYyUSyvScyvrBoV3NOEEZx/pMlsu44TKzWNkLVBBxnxJz42in5n3QIolYOcBYFCPZZ0h8SkwQ==}
+
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
 
@@ -360,6 +373,9 @@ packages:
 
   '@vue/shared@3.5.13':
     resolution: {integrity: sha512-/hnE/qP5ZoGpol0a5mDi45bOd7t3tjYJBjsgCsivow7D48cJeV5l05RD82lPqi7gRiphZM37rnhW1l6ZoCNNnQ==}
+
+  '@webgpu/types@0.1.53':
+    resolution: {integrity: sha512-x+BLw/opaz9LiVyrMsP75nO1Rg0QfrACUYIbVSfGwY/w0DiWIPYYrpte6us//KZXinxFAOJl0+C17L1Vi2vmDw==}
 
   acorn@8.14.0:
     resolution: {integrity: sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==}
@@ -889,6 +905,12 @@ snapshots:
 
   '@types/argparse@1.0.38': {}
 
+  '@types/dom-mediacapture-transform@0.1.10':
+    dependencies:
+      '@types/dom-webcodecs': 0.1.13
+
+  '@types/dom-webcodecs@0.1.13': {}
+
   '@types/estree@1.0.6': {}
 
   '@volar/language-core@2.4.11':
@@ -935,6 +957,8 @@ snapshots:
       typescript: 5.4.2
 
   '@vue/shared@3.5.13': {}
+
+  '@webgpu/types@0.1.53': {}
 
   acorn@8.14.0: {}
 
