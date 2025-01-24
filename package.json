@@ -12,5 +12,9 @@
   "dependencies": {
     "vite": "^6.0.7",
     "vite-plugin-dts": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/dom-mediacapture-transform": "^0.1.10",
+    "@webgpu/types": "^0.1.53"
   }
 }

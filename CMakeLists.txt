@@ -8,7 +8,7 @@ set(ENTRYPOINT ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 # Include custom cmake modules and add packages
 
 # Set C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 
 # Disable examples
 set(ZXING_EXAMPLES OFF)
@@ -23,14 +23,16 @@ set(ZXING_USE_BUNDLED_ZINT ON)
 
 # OPTIMIZE
 set(OPT_SIMD ON)
-set(OPT_RELAXED_SIMD OFF)
+set(OPT_RELAXED_SIMD ON)
 
 
 # Build environment
 set(ZXING_EMSCRIPTEN_ENVIRONMENT "web,worker")
 
 # Default build type
-set(CMAKE_BUILD_TYPE "Release")
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
+endif()
 
 # Set compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
@@ -38,31 +40,39 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
   -s DISABLE_EXCEPTION_CATCHING=0")
 
 # Set linker flags
+# TODO: tsd name follow executable name
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
+  -flto \
   -lembind \
   -fexceptions \
-  --emit-tsd interface.d.ts \
+  --emit-tsd zxing_reader.d.ts \
   -s DISABLE_EXCEPTION_CATCHING=0 \
   -s ENVIRONMENT=${ZXING_EMSCRIPTEN_ENVIRONMENT} \
   -s FILESYSTEM=0 \
   -s EXPORT_ES6=1 \
   -s MODULARIZE=1 \
-  -s DYNAMIC_EXECUTION=0 \
-  -s EXPORT_NAME=ZXing \
-  -s EXPORTED_FUNCTIONS=\"['_malloc', '_free']\" \
   -s ALLOW_MEMORY_GROWTH=1 \
   -s WASM_BIGINT=1 \
-  -s EMIT_EMSCRIPTEN_LICENSE=1"
+  -s EMIT_EMSCRIPTEN_LICENSE=1 \
+  -s TEXTDECODER=2"
 )
 
 if(OPT_SIMD)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msimd128")
 endif()
 if(OPT_RELAXED_SIMD)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mrelaxed-simd")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mrelaxed-simd -mavx")
 endif()
 
-
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  # Flags zxing-cpp uses for writing debug file
+  add_definitions(-DNDEBUG)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g")
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O3")
+endif()
 
 # Test compiler with a simple HelloWorld code and print out if error occurred
 file(WRITE ${CMAKE_BINARY_DIR}/test_helloworld.cpp "
@@ -97,7 +107,7 @@ if(ZXING_READERS)
   target_compile_definitions(zxing_reader PRIVATE READER)
   target_link_libraries(zxing_reader ZXing::ZXing )
   set_target_properties(zxing_reader PROPERTIES 
-                        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/dist/reader")
+                        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/wasm-out/reader")
 endif()
 
 if(ZXING_WRITERS MATCHES "NEW")

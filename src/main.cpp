@@ -2,10 +2,11 @@
 #include <vector>
 #include <algorithm>
 #include <type_traits>
-#include "Zxing/ReadBarcode.h"
+#include "ReadBarcode.h"
+#include <Version.h>
 #include <emscripten/bind.h>
-#include <pthread.h>
-#if ZXING_READERS
+
+#ifdef ZXING_READERS
 template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 struct Rect
 {
@@ -14,75 +15,117 @@ struct Rect
     T w;
     T h;
 };
-
-class ReadResult
+const inline Rect<int> getBarcodeRect(ZXing::Barcode barcode)
+{
+    auto pos = barcode.position();
+    auto pointTopLeft = pos.topLeft();
+    Rect<int> rect = {
+        .x = pointTopLeft.x,
+        .y = pointTopLeft.y,
+        .w = pos.topRight().x - pointTopLeft.x,
+        .h = pos.bottomRight().y - pointTopLeft.y};
+    return rect;
+}
+const inline std::string getBarcodeFormatDescription(ZXing::Barcode barcode)
+{
+    return ZXing::ToString(barcode.format());
+}
+const inline std::string getBarcodeText(ZXing::Barcode barcode)
+{
+    return barcode.text();
+}
+class Reader
 {
 public:
-    inline std::string getText() const
+    int width;
+    int height;
+    Reader()
     {
-        return barcode.text();
+        width = 0;
+        height = 0;
+        options = ZXing::ReaderOptions().setFormats(ZXing::BarcodeFormat::Any);
+    }
+    Reader(int width, int height)
+    {
+        resizeBuf(width, height);
+        options = ZXing::ReaderOptions().setFormats(ZXing::BarcodeFormat::Any);
+    }
+    emscripten::val getBuf()
+    {
+        return emscripten::val(emscripten::typed_memory_view(_buf.size(), _buf.data()));
     };
-    inline std::string getFormat() const
+    ZXing::Barcodes read()
     {
-        return ZXing::ToString(barcode.format());
+        ZXing::ImageView image(_buf.data(), width, height, format);
+        return ZXing::ReadBarcodes(image, options);
     }
-    inline std::string getECLevel() const
+    void resizeBuf(int width, int height)
     {
-        return barcode.ecLevel();
+        this->width = width;
+        this->height = height;
+        _buf.resize(width * height * channel);
     }
-    inline bool hasECI() const
+    void setChannel(int channel)
     {
-        return barcode.hasECI();
-    }
-    inline Rect<int> getRect() const
-    {
-        auto pos = barcode.position();
-        auto pointTopLeft = pos.topLeft();
-        Rect<int> rect = {
-            .x = pointTopLeft.x,
-            .y = pointTopLeft.y,
-            .w = pos.topRight().x - pointTopLeft.x,
-            .h = pos.bottomRight().y - pointTopLeft.y};
-        return rect;
-    }
-    ReadResult(ZXing::Barcode barcode)
-    {
-        this->barcode = barcode;
+        if (channel == 4)
+        {
+            format = ZXing::ImageFormat::RGBA;
+        }
+        else if (channel == 1)
+        {
+            format = ZXing::ImageFormat::Lum;
+        }
+        else
+        {
+            throw std::invalid_argument("only support RGBA or Lum");
+        }
+        this->channel = channel;
     }
 
 private:
-    ZXing::Barcode barcode;
+    std::vector<unsigned char> _buf;
+    ZXing::ReaderOptions options;
+    int channel = 1;
+    ZXing::ImageFormat format = ZXing::ImageFormat::Lum;
 };
-// TODO: ToLum using WebGL
-std::vector<ReadResult> read(const unsigned char *imageData, int width, int height)
-{
-    ZXing::ImageView image(imageData, width, height, ZXing::ImageFormat::RGBA);
-    auto options = ZXing::ReaderOptions().setFormats(ZXing::BarcodeFormat::Any);
-    auto barcodes = ZXing::ReadBarcodes(image, options);
-    std::vector<ReadResult> results(barcodes.size());
 
-    std::transform(barcodes.begin(), barcodes.end(), results.begin(),
-                   [](const ZXing::Barcode &barcode)
-                   {
-                       ReadResult result(barcode);
-                       return result;
-                   });
-    return results;
-}
-EMSCRIPTEN_BINDINGS(ReadResult)
+EMSCRIPTEN_BINDINGS(ZxingReader)
 {
-    emscripten::class_<Rect<int>>("Rect")
+    constexpr const char *DESCR = "ZXing " ZXING_VERSION_STR "\n"
+    /* "C++:" std::string(__cplusplus) '\n' */
+#ifdef __wasm_simd128__
+                                  "WASMSIMD "
+#endif
+#ifdef __wasm_relaxed_simd__
+                                  "RELAXEDSIMD "
+#endif
+#ifdef __AVX__
+                                  "AVX ";
+#endif
+    using namespace emscripten;
+    register_vector<ZXing::Barcode>("Barcodes");
+    class_<Rect<int>>("Rect")
         .property("x", &Rect<int>::x)
         .property("y", &Rect<int>::y)
         .property("w", &Rect<int>::w)
         .property("h", &Rect<int>::h);
 
-    emscripten::class_<ReadResult>("ReadResult")
-        .property("text", &ReadResult::getText, emscripten::return_value_policy::reference())
-        .property("format", &ReadResult::getFormat, emscripten::return_value_policy::reference())
-        .property("ecLevel", &ReadResult::getECLevel, emscripten::return_value_policy::reference())
-        .property("rect", &ReadResult::getRect, emscripten::return_value_policy::reference())
-        .property("hasECI", &ReadResult::hasECI);
-    emscripten::function("read", &read);
+    class_<ZXing::Barcode>("Barcode")
+        .property("ecLevel", &ZXing::Barcode::ecLevel)
+        .property("hasECI", &ZXing::Barcode::hasECI);
+
+    function("getBarcodeFormatDescription", &getBarcodeFormatDescription);
+    function("getBarcodeRect", &getBarcodeRect);
+    function("getBarcodeText", &getBarcodeText);
+    class_<Reader>("Reader")
+        .constructor<>()
+        .constructor<int, int>()
+        .property("width", &Reader::width)
+        .property("height", &Reader::height)
+        .function("resizeBuf", &Reader::resizeBuf)
+        .function("read", &Reader::read)
+        .function("getBuf", &Reader::getBuf) // 将 property 改为 function
+        .function("setChannel", &Reader::setChannel);
+    constant("DESCR", std::string(DESCR));
 }
 #endif
