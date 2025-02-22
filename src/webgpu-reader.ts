@@ -3,7 +3,7 @@ import WebGPUImageLumExtractor from './lum'
 export default class WebGPUBarcodeReader {
     #r: Reader
     #lum: WebGPUImageLumExtractor
-    async #read(img: CanvasImageSource, width: number, height: number) {
+    async #read(img: VideoFrame, width: number, height: number) {
         const arr = this.#r.getBuf() as Uint8Array
         performance.mark('extract start')
 
@@ -29,12 +29,12 @@ export default class WebGPUBarcodeReader {
             this.#r.resizeBuf(width, height)
         }
     }
-    read(img: Exclude<CanvasImageSource, SVGImageElement | VideoFrame>) {
+/*     read(img: Exclude<CanvasImageSource, SVGImageElement | VideoFrame>) {
         const { width, height } = img
         this.resize(width, height)
 
         return this.#read(img, width, height)
-    }
+    } */
     readVideoFrame(frame: VideoFrame) {
         return this.#read(frame, frame.displayWidth, frame.displayHeight)
     }

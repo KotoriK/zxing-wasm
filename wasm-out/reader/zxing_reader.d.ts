@@ -63,9 +63,9 @@ interface EmbindModule {
     new(): Reader;
     new(_0: number, _1: number): Reader;
   };
+  DESCR: EmbindString;
   getBarcodeFormatDescription(_0: Barcode): string;
   getBarcodeText(_0: Barcode): string;
-  DESCR: EmbindString;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;

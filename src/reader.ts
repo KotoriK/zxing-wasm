@@ -28,4 +28,11 @@ export default class BarcodeReader {
         buf.set(imageData.data)
         return this.#r.read()
     }
+    read(image: ImageBitmap) {
+        this.#c.getContext('bitmaprenderer')?.transferFromImageBitmap(image)
+        const imageData = this.#ctx.getImageData(0, 0, image.width, image.height)
+        const buf = this.#r.getBuf()
+        buf.set(imageData.data)
+        return this.#r.read()
+    }
 }
