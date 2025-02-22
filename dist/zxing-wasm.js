@@ -18,6 +18,8 @@ var Module=moduleArg;var readyPromiseResolve,readyPromiseReject;var readyPromise
 );
 })();
 
+const modulePromise = Module();
+
 class BarcodeReader {
   #c;
   #ctx;
@@ -29,7 +31,7 @@ class BarcodeReader {
     });
   }
   async init() {
-    const module = await Module();
+    const module = await modulePromise;
     console.log(module.DESCR);
     this.#r = new module.Reader();
     this.#r.setChannel(4);
@@ -55,5 +57,41 @@ class BarcodeReader {
   }
 }
 
-export { BarcodeReader };
+function createStreamReader(stream) {
+  const reader = new BarcodeReader();
+  const initializeTask = reader.init();
+  const track = stream.getVideoTracks()[0];
+  let pause = false;
+  let started = false;
+  const start = async function start2(onResult) {
+    if (started) {
+      throw new Error("Already started");
+    }
+    started = true;
+    pause = false;
+    await initializeTask;
+    const settings = track.getSettings();
+    reader.resize(settings.width, settings.height);
+    for await (const frame of new MediaStreamTrackProcessor({ track }).readable) {
+      if (pause) {
+        return;
+      }
+      const barcodes = reader.readVideoFrame(frame);
+      if (barcodes.size() > 0) {
+        onResult(barcodes);
+      }
+    }
+    started = false;
+  };
+  return {
+    start,
+    pause: () => pause = true,
+    abort: () => {
+      pause = true;
+      track.stop();
+    }
+  };
+}
+
+export { BarcodeReader, createStreamReader, modulePromise as module };
 //# sourceMappingURL=zxing-wasm.js.map

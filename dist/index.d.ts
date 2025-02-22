@@ -1,4 +1,4 @@
-export declare interface Barcode extends ClassHandle {
+declare interface Barcode extends ClassHandle {
     readonly hasECI: boolean;
     readonly ecLevel: string;
 }
@@ -12,7 +12,7 @@ export declare class BarcodeReader {
     read(image: ImageBitmap): Barcodes;
 }
 
-export declare interface Barcodes extends ClassHandle {
+declare interface Barcodes extends ClassHandle {
     push_back(_0: Barcode): void;
     resize(_0: number, _1: Barcode): void;
     size(): number;
@@ -20,7 +20,7 @@ export declare interface Barcodes extends ClassHandle {
     set(_0: number, _1: Barcode): boolean;
 }
 
-export declare interface ClassHandle {
+declare interface ClassHandle {
     isAliasOf(other: ClassHandle): boolean;
     delete(): void;
     deleteLater(): this;
@@ -28,7 +28,13 @@ export declare interface ClassHandle {
     clone(): this;
 }
 
-export declare interface EmbindModule {
+export declare function createStreamReader(stream: MediaStream): {
+    start: (onResult: (barcodes: ReturnType<BarcodeReader["readVideoFrame"]>) => void) => Promise<void>;
+    pause: () => boolean;
+    abort: () => void;
+};
+
+declare interface EmbindModule {
     Barcodes: {
         new(): Barcodes;
     };
@@ -44,11 +50,13 @@ export declare interface EmbindModule {
     getBarcodeText(_0: Barcode): string;
 }
 
-export declare type EmbindString = ArrayBuffer|Uint8Array|Uint8ClampedArray|Int8Array|string;
+declare type EmbindString = ArrayBuffer|Uint8Array|Uint8ClampedArray|Int8Array|string;
 
-export declare type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;
+declare type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;
 
-export declare interface Reader extends ClassHandle {
+export declare const module: Promise<MainModule>;
+
+declare interface Reader extends ClassHandle {
     width: number;
     height: number;
     read(): Barcodes;
@@ -57,14 +65,14 @@ export declare interface Reader extends ClassHandle {
     getBuf(): any;
 }
 
-export declare interface Rect extends ClassHandle {
+declare interface Rect extends ClassHandle {
     x: number;
     y: number;
     w: number;
     h: number;
 }
 
-export declare namespace RuntimeExports {
+declare namespace RuntimeExports {
     let HEAPF32: any;
     let HEAPF64: any;
     let HEAP_DATA_VIEW: any;
@@ -78,7 +86,7 @@ export declare namespace RuntimeExports {
     let HEAPU64: any;
 }
 
-export declare interface WasmModule {
+declare interface WasmModule {
 }
 
 export { }
