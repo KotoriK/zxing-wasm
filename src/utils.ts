@@ -3,8 +3,10 @@ export async function* listAllVideoDevices() {
     for (const device of devices) {
         if (device.kind === 'videoinput' || (device as any).kind === 'video') {
             yield {
-                ...device,
                 deviceId: device.deviceId || (device as any).id,
+                groupId: device.groupId,
+                kind: device.kind,
+                label: device.label,
             }
         }
     }
