@@ -1,3 +1,4 @@
 // export { default as WebGPUBarcodeReader } from './webgpu-reader'
+export { default as module } from './wasm'
 export { default as BarcodeReader } from './reader'
-export * from '../wasm-out/reader/zxing_reader'
+export { default as createStreamReader } from './stream-reader'

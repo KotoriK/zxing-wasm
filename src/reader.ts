@@ -1,4 +1,5 @@
-import init, { Reader } from '../wasm-out/reader/zxing_reader'
+import type { Reader } from '../wasm-out/reader/zxing_reader'
+import modulePromise from './wasm'
 
 export default class BarcodeReader {
     #c: OffscreenCanvas
@@ -11,7 +12,7 @@ export default class BarcodeReader {
         })!
     }
     async init() {
-        const module = (await init())
+        const module = await modulePromise
         console.log(module.DESCR)
         this.#r = new module.Reader()
         this.#r.setChannel(4)
