@@ -46,6 +46,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
   -lembind \
   -fexceptions \
   --emit-tsd zxing_reader.d.ts \
+  -s DYNAMIC_EXECUTION=0 \
   -s DISABLE_EXCEPTION_CATCHING=0 \
   -s ENVIRONMENT=${ZXING_EMSCRIPTEN_ENVIRONMENT} \
   -s FILESYSTEM=0 \
@@ -93,6 +94,9 @@ endif()
 
 # Add subdirectories
 add_subdirectory(${UPSTREAM_ROOT}/core ${CMAKE_BINARY_DIR}/ZXing)
+
+# with EMBIND_AOT test code wont be able to be compiled
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s EMBIND_AOT=1")
 # Build targets
 if(ZXING_READERS AND (ZXING_WRITERS MATCHES "NEW"))
   add_executable(zxing_full ${ENTRYPOINT})
@@ -117,3 +121,7 @@ if(ZXING_WRITERS MATCHES "NEW")
   set_target_properties(zxing_writer PROPERTIES 
                         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../writer")
 endif()
+add_custom_command(TARGET zxing_reader POST_BUILD
+  COMMAND node ${CMAKE_CURRENT_SOURCE_DIR}/scripts/fix_vite_assets_inline.js 
+  "$<TARGET_FILE:zxing_reader>"
+)
