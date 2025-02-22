@@ -1,3 +1,5 @@
+export declare function accuireUserMediaVideoStream(deviceId: string | undefined): Promise<MediaStream>;
+
 declare interface Barcode extends ClassHandle {
     readonly hasECI: boolean;
     readonly ecLevel: string;
@@ -51,6 +53,13 @@ declare interface EmbindModule {
 }
 
 declare type EmbindString = ArrayBuffer|Uint8Array|Uint8ClampedArray|Int8Array|string;
+
+export declare function listAllVideoDevices(): AsyncGenerator<{
+    deviceId: any;
+    groupId: string;
+    kind: MediaDeviceKind;
+    label: string;
+}, void, unknown>;
 
 declare type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;
 
