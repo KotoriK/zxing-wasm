@@ -11,7 +11,7 @@
       "default": "./dist/index.js"
     },
     "./wasm":{
-      "default":"./dist/zxing_wasm.wasm"
+      "default":"./dist/zxing_reader.wasm"
     }
   },
   "scripts": {
@@ -39,6 +39,7 @@
     "vite-plugin-wasm": "^3.4.1"
   },
   "files": [
-    "dist"
+    "dist",
+    "wasm-out"
   ]
 }

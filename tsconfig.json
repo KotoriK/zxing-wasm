@@ -11,7 +11,10 @@
         "types": [
             "@types/dom-mediacapture-transform",
             "@webgpu/types"
-        ]
+        ],
+        "outDir": "dist",
+        "declaration": true,
+        "allowJs": true
     },
     "include": [
         "src/**/*",
