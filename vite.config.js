@@ -12,7 +12,7 @@ export default {
         minify: false,
         lib: {
             entry: 'src/index.ts',
-            name: 'index',
+            fileName: 'index',
             formats: ['es']
         },
     }
