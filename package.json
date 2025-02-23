@@ -9,6 +9,9 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./wasm":{
+      "default":"./dist/zxing_wasm.wasm"
     }
   },
   "scripts": {
