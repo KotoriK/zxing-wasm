@@ -117,4 +117,4 @@ async function accuireUserMediaVideoStream(deviceId) {
 }
 
 export { BarcodeReader, accuireUserMediaVideoStream, createStreamReader, listAllVideoDevices, modulePromise as module };
-//# sourceMappingURL=zxing-wasm.js.map
+//# sourceMappingURL=index.js.map
