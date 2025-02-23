@@ -122,7 +122,7 @@ if(ZXING_WRITERS MATCHES "NEW")
   set_target_properties(zxing_writer PROPERTIES 
                         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../writer")
 endif()
-#add_custom_command(TARGET zxing_reader POST_BUILD
-#  COMMAND node ${CMAKE_CURRENT_SOURCE_DIR}/scripts/fix_vite_assets_inline.js 
-#  "$<TARGET_FILE:zxing_reader>"
-#)
+add_custom_command(TARGET zxing_reader POST_BUILD
+  COMMAND node ${CMAKE_CURRENT_SOURCE_DIR}/scripts/fix_vite_assets_inline.js 
+  "$<TARGET_FILE:zxing_reader>"
+)
