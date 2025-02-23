@@ -12,6 +12,7 @@
     }
   },
   "scripts": {
+    "dev": "vite",
     "build:wasm": "bash scripts/build.sh",
     "build:js": "vite build",
     "build": "npm run build:wasm && npm run build:js"

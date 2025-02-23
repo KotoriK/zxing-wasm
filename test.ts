@@ -1,4 +1,4 @@
-import { BarcodeReader } from './src'
+import { BarcodeReader, init } from './src'
 import WebGPUImageLumExtractor from './src/lum'
 
 
@@ -27,7 +27,7 @@ async function* readStream(track: MediaStreamVideoTrack) {
 const lum = new WebGPUImageLumExtractor()
 
 async function* iterateBarcodes(track: MediaStreamVideoTrack) {
-    const reader = new BarcodeReader()
+    const reader = new BarcodeReader(init())
     await reader.init()
     const { width, height } = track.getSettings()
     if (!width || !height) {
