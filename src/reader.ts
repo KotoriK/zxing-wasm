@@ -1,18 +1,17 @@
-import type { Reader } from '../wasm-out/reader/zxing_reader'
-import modulePromise from './wasm'
+import type { Reader, MainModule } from '../wasm-out/reader/zxing_reader'
 
 export default class BarcodeReader {
     #c: OffscreenCanvas
     #ctx: OffscreenCanvasRenderingContext2D
     #r: Reader
-    constructor() {
+    constructor(public modulePromise: Promise<MainModule>) {
         this.#c = new OffscreenCanvas(0, 0)
         this.#ctx = this.#c.getContext('2d', {
             willReadFrequently: true
         })!
     }
     async init() {
-        const module = await modulePromise
+        const module = await this.modulePromise
         console.log(module.DESCR)
         this.#r = new module.Reader()
         this.#r.setChannel(4)
