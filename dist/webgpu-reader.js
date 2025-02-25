@@ -1,5 +1,5 @@
-import init from '../wasm-out/reader/zxing_reader';
-import WebGPUImageLumExtractor from './lum';
+import init from '../wasm-out/reader/zxing_reader.js';
+import WebGPUImageLumExtractor from './lum.js';
 export default class WebGPUBarcodeReader {
     #r;
     #lum;

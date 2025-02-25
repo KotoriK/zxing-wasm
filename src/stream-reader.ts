@@ -1,4 +1,4 @@
-import type BarcodeReader from "./reader"
+import type BarcodeReader from "./reader.js"
 
 export default function createStreamReader(reader: BarcodeReader, stream: MediaStream) {
     const initializeTask = reader.init()

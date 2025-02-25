@@ -1,4 +1,4 @@
-import type { Reader, MainModule } from '../wasm-out/reader/zxing_reader'
+import type { Reader, MainModule } from '../wasm-out/reader/zxing_reader.js'
 
 export default class BarcodeReader {
     #c: OffscreenCanvas
@@ -28,8 +28,8 @@ export default class BarcodeReader {
         buf.set(imageData.data)
         return this.#r.read()
     }
-    read(image: ImageBitmap) {
-        this.#c.getContext('bitmaprenderer')?.transferFromImageBitmap(image)
+    read(image: Exclude<CanvasImageSource, VideoFrame | SVGImageElement>) {
+        this.#ctx.drawImage(image, 0, 0)
         const imageData = this.#ctx.getImageData(0, 0, image.width, image.height)
         const buf = this.#r.getBuf()
         buf.set(imageData.data)
