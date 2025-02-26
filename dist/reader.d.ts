@@ -7,4 +7,5 @@ export default class BarcodeReader {
     resize(width: number, height: number): void;
     readVideoFrame(frame: VideoFrame): import("../wasm-out/reader/zxing_reader.js").Barcodes;
     read(image: Exclude<CanvasImageSource, VideoFrame | SVGImageElement>): import("../wasm-out/reader/zxing_reader.js").Barcodes;
+    delete(): void;
 }

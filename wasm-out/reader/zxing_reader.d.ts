@@ -31,13 +31,6 @@ export interface Barcodes extends ClassHandle {
   set(_0: number, _1: Barcode): boolean;
 }
 
-export interface Rect extends ClassHandle {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-
 export interface Barcode extends ClassHandle {
   readonly hasECI: boolean;
   readonly ecLevel: string;
@@ -56,9 +49,7 @@ interface EmbindModule {
   Barcodes: {
     new(): Barcodes;
   };
-  Rect: {};
   Barcode: {};
-  getBarcodeRect(_0: Barcode): Rect;
   Reader: {
     new(): Reader;
     new(_0: number, _1: number): Reader;
@@ -66,6 +57,7 @@ interface EmbindModule {
   DESCR: EmbindString;
   getBarcodeFormatDescription(_0: Barcode): string;
   getBarcodeText(_0: Barcode): string;
+  getBarcodeRect(_0: Barcode): any;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;
