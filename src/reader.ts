@@ -12,7 +12,6 @@ export default class BarcodeReader {
     }
     async init() {
         const module = await this.modulePromise
-        console.log(module.DESCR)
         this.#r = new module.Reader()
         this.#r.setChannel(4)
     }
@@ -34,5 +33,9 @@ export default class BarcodeReader {
         const buf = this.#r.getBuf()
         buf.set(imageData.data)
         return this.#r.read()
+    }
+    delete() {
+        this.#r.delete()
+        this.#c = this.#ctx = this.#r = null as any
     }
 }
