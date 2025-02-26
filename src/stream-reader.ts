@@ -16,22 +16,26 @@ export default function createStreamReader(reader: BarcodeReader, stream: MediaS
         const settings = track.getSettings()
         reader.resize(settings.width, settings.height)
         for await (const frame of new MediaStreamTrackProcessor({ track }).readable) {
-            if (pause) {
-                return
-            }
-            const barcodes = reader.readVideoFrame(frame)
-            if (barcodes.size() > 0) {
-                onResult(barcodes)
+            try {
+                if (pause) {
+                    return
+                }
+                const barcodes = reader.readVideoFrame(frame)
+                if (barcodes.size() > 0) {
+                    onResult(barcodes)
+                }
+            } finally {
+                frame.close()
             }
         }
         started = false
     }
     return {
         start,
-        pause: () => pause = true,
-        abort: () => {
+        stop: () => {
             pause = true
             track.stop()
+            reader.delete()
         }
     }
 }
