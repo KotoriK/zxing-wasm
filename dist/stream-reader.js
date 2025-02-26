@@ -18,9 +18,7 @@ export default function createStreamReader(reader, stream) {
                     return;
                 }
                 const barcodes = reader.readVideoFrame(frame);
-                if (barcodes.size() > 0) {
-                    onResult(barcodes);
-                }
+                onResult(barcodes);
             }
             finally {
                 frame.close();
