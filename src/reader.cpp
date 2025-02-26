@@ -5,24 +5,22 @@
 #include "ReadBarcode.h"
 #include <emscripten/bind.h>
 
-template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-struct Rect
+const emscripten::val parseXYPoint(ZXing::PointI point)
 {
-    T x;
-    T y;
-    T w;
-    T h;
+    emscripten::val jsArray = emscripten::val::array();
+    jsArray.set(0, point.x);
+    jsArray.set(1, point.y);
+    return jsArray;
 };
-const Rect<int> getBarcodeRect(ZXing::Barcode barcode)
+const emscripten::val getBarcodeRect(ZXing::Barcode barcode)
 {
+    emscripten::val jsArray = emscripten::val::array();
     auto pos = barcode.position();
-    auto pointTopLeft = pos.topLeft();
-    Rect<int> rect = {
-        .x = pointTopLeft.x,
-        .y = pointTopLeft.y,
-        .w = pos.topRight().x - pointTopLeft.x,
-        .h = pos.bottomRight().y - pointTopLeft.y};
-    return rect;
+    jsArray.set(0, parseXYPoint(pos.topLeft()));
+    jsArray.set(1, parseXYPoint(pos.topRight()));
+    jsArray.set(2, parseXYPoint(pos.bottomRight()));
+    jsArray.set(3, parseXYPoint(pos.bottomLeft()));
+    return jsArray;
 }
 const inline std::string getBarcodeFormatDescription(ZXing::Barcode barcode)
 {
@@ -92,11 +90,6 @@ EMSCRIPTEN_BINDINGS(ZxingReader)
 {
     using namespace emscripten;
     register_vector<ZXing::Barcode>("Barcodes");
-    class_<Rect<int>>("Rect")
-        .property("x", &Rect<int>::x)
-        .property("y", &Rect<int>::y)
-        .property("w", &Rect<int>::w)
-        .property("h", &Rect<int>::h);
 
     class_<ZXing::Barcode>("Barcode")
         .property("ecLevel", &ZXing::Barcode::ecLevel)
