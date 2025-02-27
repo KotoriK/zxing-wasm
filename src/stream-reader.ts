@@ -1,18 +1,15 @@
 import type BarcodeReader from "./reader.js"
 
 export default function createStreamReader(reader: BarcodeReader, stream: MediaStream) {
-    const initializeTask = reader.init()
-
     const track = stream.getVideoTracks()[0]
     let pause = false
     let started = false
-    const start = async function start(onResult: (barcodes: ReturnType<BarcodeReader['readVideoFrame']>) => void) {
+    const start = async function start(onResult: (barcodes: ReturnType<BarcodeReader['readVF']>) => void) {
         if (started) {
             throw new Error('Already started')
         }
         started = true
         pause = false
-        await initializeTask
         const settings = track.getSettings()
         reader.resize(settings.width, settings.height)
         for await (const frame of new MediaStreamTrackProcessor({ track }).readable) {
@@ -20,7 +17,7 @@ export default function createStreamReader(reader: BarcodeReader, stream: MediaS
                 if (pause) {
                     return
                 }
-                const barcodes = reader.readVideoFrame(frame)
+                const barcodes = reader.readVF(frame)
                 onResult(barcodes)
 
             } finally {

@@ -4,23 +4,21 @@
 #include <type_traits>
 #include "ReadBarcode.h"
 #include <emscripten/bind.h>
+EMSCRIPTEN_DECLARE_VAL_TYPE(NumberArray);
 
-const emscripten::val parseXYPoint(ZXing::PointI point)
-{
-    emscripten::val jsArray = emscripten::val::array();
-    jsArray.set(0, point.x);
-    jsArray.set(1, point.y);
-    return jsArray;
-};
-const emscripten::val getBarcodeRect(ZXing::Barcode barcode)
+const NumberArray getBarcodeRect(ZXing::Barcode barcode)
 {
     emscripten::val jsArray = emscripten::val::array();
     auto pos = barcode.position();
-    jsArray.set(0, parseXYPoint(pos.topLeft()));
-    jsArray.set(1, parseXYPoint(pos.topRight()));
-    jsArray.set(2, parseXYPoint(pos.bottomRight()));
-    jsArray.set(3, parseXYPoint(pos.bottomLeft()));
-    return jsArray;
+    jsArray.set(0, pos.topLeft().x);
+    jsArray.set(1, pos.topLeft().y);
+    jsArray.set(2, pos.topRight().x);
+    jsArray.set(3, pos.topRight().y);
+    jsArray.set(4, pos.bottomRight().x);
+    jsArray.set(5, pos.bottomRight().y);
+    jsArray.set(6, pos.bottomLeft().x);
+    jsArray.set(7, pos.bottomLeft().y);
+    return static_cast<NumberArray>(jsArray);
 }
 const inline std::string getBarcodeFormatDescription(ZXing::Barcode barcode)
 {
@@ -47,10 +45,14 @@ public:
         resizeBuf(width, height);
         options = ZXing::ReaderOptions().setFormats(ZXing::BarcodeFormat::Any);
     }
-    emscripten::val getBuf()
+    inline size_t getBufSize()
     {
-        return emscripten::val(emscripten::typed_memory_view(_buf.size(), _buf.data()));
-    };
+        return _buf.size();
+    }
+    inline const auto getBufOffset()
+    {
+        return reinterpret_cast<uintptr_t>(_buf.data());
+    }
     ZXing::Barcodes read()
     {
         ZXing::ImageView image(_buf.data(), width, height, format);
@@ -95,9 +97,12 @@ EMSCRIPTEN_BINDINGS(ZxingReader)
         .property("ecLevel", &ZXing::Barcode::ecLevel)
         .property("hasECI", &ZXing::Barcode::hasECI);
 
+    register_type<NumberArray>("[number,number,number,number,number,number,number,number]" /*vector 8 */);
+
     function("getBarcodeFormatDescription", &getBarcodeFormatDescription);
     function("getBarcodeRect", &getBarcodeRect);
     function("getBarcodeText", &getBarcodeText);
+
     class_<Reader>("Reader")
         .constructor<>()
         .constructor<int, int>()
@@ -105,6 +110,7 @@ EMSCRIPTEN_BINDINGS(ZxingReader)
         .property("height", &Reader::height)
         .function("resizeBuf", &Reader::resizeBuf)
         .function("read", &Reader::read)
-        .function("getBuf", &Reader::getBuf) // 将 property 改为 function
+        .function("getBufOffset", &Reader::getBufOffset) 
+        .function("getBufSize", &Reader::getBufSize)
         .function("setChannel", &Reader::setChannel);
 }

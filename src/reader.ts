@@ -1,41 +1,40 @@
 import type { Reader, MainModule } from '../wasm-out/reader/zxing_reader.js'
+import { getUnderlyingBuffer } from './utils.js'
 
 export default class BarcodeReader {
-    #c: OffscreenCanvas
-    #ctx: OffscreenCanvasRenderingContext2D
+    c: OffscreenCanvas | HTMLCanvasElement
+    #ctx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D
     #r: Reader
-    constructor(public modulePromise: Promise<MainModule>) {
-        this.#c = new OffscreenCanvas(0, 0)
-        this.#ctx = this.#c.getContext('2d', {
+    #rb: Uint8Array
+    constructor(public m: MainModule, canvas?: OffscreenCanvas | HTMLCanvasElement) {
+        this.c = canvas || new OffscreenCanvas(0, 0)
+        this.#ctx = this.c.getContext('2d', {
             willReadFrequently: true
         })!
-    }
-    async init() {
-        const module = await this.modulePromise
-        this.#r = new module.Reader()
+        this.#r = new m.Reader()
         this.#r.setChannel(4)
+        this.#rb = getUnderlyingBuffer(m, this.#r.getBufOffset(), this.#r.getBufSize())
     }
     resize(width: number, height: number) {
-        this.#c.width = width
-        this.#c.height = height
+        this.c.width = width
+        this.c.height = height
         this.#r.resizeBuf(width, height)
+        this.#rb = getUnderlyingBuffer(this.m, this.#r.getBufOffset(), this.#r.getBufSize())
     }
-    readVideoFrame(frame: VideoFrame) {
+    readVF(frame: VideoFrame) {
         this.#ctx.drawImage(frame, 0, 0)
         const imageData = this.#ctx.getImageData(0, 0, frame.displayWidth, frame.displayHeight)
-        const buf = this.#r.getBuf()
-        buf.set(imageData.data)
+        this.#rb.set(imageData.data)
         return this.#r.read()
     }
     read(image: Exclude<CanvasImageSource, VideoFrame | SVGImageElement>) {
         this.#ctx.drawImage(image, 0, 0)
         const imageData = this.#ctx.getImageData(0, 0, image.width, image.height)
-        const buf = this.#r.getBuf()
-        buf.set(imageData.data)
+        this.#rb.set(imageData.data)
         return this.#r.read()
     }
     delete() {
         this.#r.delete()
-        this.#c = this.#ctx = this.#r = null as any
+        this.#rb = this.c = this.#ctx = this.#r = null as any
     }
 }

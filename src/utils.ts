@@ -1,3 +1,5 @@
+import { MainModule } from "../wasm-out/reader/zxing_reader.js"
+
 export async function* listAllVideoDevices() {
     const devices = await navigator.mediaDevices.enumerateDevices()
     for (const device of devices) {
@@ -19,4 +21,7 @@ export async function accuireUserMediaVideoStream(deviceId: string | undefined) 
             facingMode: 'environment',
         },
     })
+}
+export function getUnderlyingBuffer(module: MainModule, offset: number, size: number) {
+    return (module.HEAPU8 as Uint8Array).subarray(offset, offset + size)
 }

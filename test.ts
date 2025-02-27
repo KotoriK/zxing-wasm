@@ -1,7 +1,6 @@
 import { BarcodeReader, init } from './src'
 import WebGPUImageLumExtractor from './src/lum'
 
-
 /* const cameraStream = await navigator.mediaDevices.getDisplayMedia()
  */const cameraStream = await navigator.mediaDevices.getUserMedia({
     video: {
@@ -27,8 +26,7 @@ async function* readStream(track: MediaStreamVideoTrack) {
 const lum = new WebGPUImageLumExtractor()
 
 async function* iterateBarcodes(track: MediaStreamVideoTrack) {
-    const reader = new BarcodeReader(init())
-    await reader.init()
+    const reader = new BarcodeReader(await init())
     const { width, height } = track.getSettings()
     if (!width || !height) {
         throw new TypeError('invalid width or height')
@@ -37,7 +35,7 @@ async function* iterateBarcodes(track: MediaStreamVideoTrack) {
 
     for await (const frame of readStream(track)) {
         performance.mark('read start')
-        const vector = reader.readVideoFrame(frame)
+        const vector = reader.readVF(frame)
         performance.mark('read end')
         performance.measure('read', 'read start', 'read end')
 
