@@ -11,7 +11,11 @@
       "default": "./dist/index.js"
     },
     "./wasm":{
-      "default":"./dist/zxing_reader.wasm"
+      "default":"./wasm-out/reader/zxing_reader.wasm"
+    },
+    "./utils":{
+      "types":"./dist/utils.d.ts",
+      "default":"./dist/utils.js"
     }
   },
   "scripts": {
