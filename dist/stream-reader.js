@@ -1,5 +1,4 @@
 export default function createStreamReader(reader, stream) {
-    const initializeTask = reader.init();
     const track = stream.getVideoTracks()[0];
     let pause = false;
     let started = false;
@@ -9,7 +8,6 @@ export default function createStreamReader(reader, stream) {
         }
         started = true;
         pause = false;
-        await initializeTask;
         const settings = track.getSettings();
         reader.resize(settings.width, settings.height);
         for await (const frame of new MediaStreamTrackProcessor({ track }).readable) {
@@ -17,7 +15,7 @@ export default function createStreamReader(reader, stream) {
                 if (pause) {
                     return;
                 }
-                const barcodes = reader.readVideoFrame(frame);
+                const barcodes = reader.readVF(frame);
                 onResult(barcodes);
             }
             finally {

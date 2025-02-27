@@ -20,3 +20,6 @@ export async function accuireUserMediaVideoStream(deviceId) {
         },
     });
 }
+export function getUnderlyingBuffer(module, offset, size) {
+    return module.HEAPU8.subarray(offset, offset + size);
+}

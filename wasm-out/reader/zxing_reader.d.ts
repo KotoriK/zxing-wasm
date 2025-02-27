@@ -42,7 +42,8 @@ export interface Reader extends ClassHandle {
   read(): Barcodes;
   resizeBuf(_0: number, _1: number): void;
   setChannel(_0: number): void;
-  getBuf(): any;
+  getBufOffset(): number;
+  getBufSize(): number;
 }
 
 interface EmbindModule {
@@ -50,6 +51,7 @@ interface EmbindModule {
     new(): Barcodes;
   };
   Barcode: {};
+  getBarcodeRect(_0: Barcode): [number,number,number,number,number,number,number,number];
   Reader: {
     new(): Reader;
     new(_0: number, _1: number): Reader;
@@ -57,7 +59,6 @@ interface EmbindModule {
   DESCR: EmbindString;
   getBarcodeFormatDescription(_0: Barcode): string;
   getBarcodeText(_0: Barcode): string;
-  getBarcodeRect(_0: Barcode): any;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;
