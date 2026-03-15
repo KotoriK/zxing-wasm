@@ -1,4 +1,4 @@
-import { BarcodeReader, init } from './src'
+import { BarcodeReader, readerInit } from './src'
 import WebGPUImageLumExtractor from './src/lum'
 
 /* const cameraStream = await navigator.mediaDevices.getDisplayMedia()
@@ -26,7 +26,7 @@ async function* readStream(track: MediaStreamVideoTrack) {
 const lum = new WebGPUImageLumExtractor()
 
 async function* iterateBarcodes(track: MediaStreamVideoTrack) {
-    const reader = new BarcodeReader(await init())
+    const reader = new BarcodeReader(await readerInit())
     const { width, height } = track.getSettings()
     if (!width || !height) {
         throw new TypeError('invalid width or height')

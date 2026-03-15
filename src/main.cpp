@@ -17,6 +17,9 @@ EMSCRIPTEN_BINDINGS(Version)
 #endif
     constant("DESCR", std::string(DESCR));
 }
-#ifdef ZXING_READERS
+#ifdef READER
 #include "reader.cpp"
+#endif
+#ifdef WRITER
+#include "writer.cpp"
 #endif
