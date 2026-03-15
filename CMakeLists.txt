@@ -15,8 +15,7 @@ set(ZXING_EXAMPLES OFF)
 
 # Build options
 set(ZXING_READERS ON)
-# set(ZXING_WRITERS "NEW")
-set(ZXING_WRITERS OFF)
+set(ZXING_WRITERS "NEW")
 
 set(ZXING_EXPERIMENTAL_API ON)
 set(ZXING_USE_BUNDLED_ZINT ON)
@@ -40,12 +39,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
   -s DISABLE_EXCEPTION_CATCHING=0")
 
 # Set linker flags
-# TODO: tsd name follow executable name
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
   -flto \
   -lembind \
   -fexceptions \
-  --emit-tsd zxing_reader.d.ts \
   -s DYNAMIC_EXECUTION=0 \
   -s DISABLE_EXCEPTION_CATCHING=0 \
   -s ENVIRONMENT=${ZXING_EMSCRIPTEN_ENVIRONMENT} \
@@ -99,18 +96,11 @@ add_subdirectory(${UPSTREAM_ROOT}/core ${CMAKE_BINARY_DIR}/ZXing)
 # with EMBIND_AOT test code wont be able to be compiled
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s EMBIND_AOT=1")
 # Build targets
-if(ZXING_READERS AND (ZXING_WRITERS MATCHES "NEW"))
-  add_executable(zxing_full ${ENTRYPOINT})
-  target_compile_definitions(zxing_full PRIVATE READER WRITER)
-  target_link_libraries(zxing_full ZXing::ZXing )
-  set_target_properties(zxing_full PROPERTIES 
-                        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../full")
-endif()
-
 if(ZXING_READERS)
   add_executable(zxing_reader ${ENTRYPOINT})
   target_compile_definitions(zxing_reader PRIVATE READER)
   target_link_libraries(zxing_reader ZXing::ZXing )
+  target_link_options(zxing_reader PRIVATE "--emit-tsd" "zxing_reader.d.ts")
   set_target_properties(zxing_reader PROPERTIES 
                         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/wasm-out/reader")
 endif()
@@ -119,10 +109,7 @@ if(ZXING_WRITERS MATCHES "NEW")
   add_executable(zxing_writer ${ENTRYPOINT})
   target_compile_definitions(zxing_writer PRIVATE WRITER)
   target_link_libraries(zxing_writer ZXing::ZXing )
+  target_link_options(zxing_writer PRIVATE "--emit-tsd" "zxing_writer.d.ts")
   set_target_properties(zxing_writer PROPERTIES 
-                        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../writer")
+                        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/wasm-out/writer")
 endif()
-#add_custom_command(TARGET zxing_reader POST_BUILD
-#  COMMAND node ${CMAKE_CURRENT_SOURCE_DIR}/scripts/fix_vite_assets_inline.js 
-#  "$<TARGET_FILE:zxing_reader>"
-#)

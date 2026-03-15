@@ -13,6 +13,12 @@
     "./wasm":{
       "default":"./wasm-out/reader/zxing_reader.wasm"
     },
+    "./wasm/reader":{
+      "default":"./wasm-out/reader/zxing_reader.wasm"
+    },
+    "./wasm/writer":{
+      "default":"./wasm-out/writer/zxing_writer.wasm"
+    },
     "./utils":{
       "types":"./dist/utils.d.ts",
       "default":"./dist/utils.js"
