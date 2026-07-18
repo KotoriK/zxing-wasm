@@ -13,8 +13,9 @@ EMSCRIPTEN_BINDINGS(Version)
                                   "RELAXEDSIMD "
 #endif
 #ifdef __AVX__
-                                  "AVX ";
+                                  "AVX "
 #endif
+                                  ;
     constant("DESCR", std::string(DESCR));
 }
 #ifdef READER

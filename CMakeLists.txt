@@ -1,6 +1,6 @@
 # https://github.com/Sec-ant/zxing-wasm/blob/bffbf9db1ed288a9a5328917e95b7838775f7c99/src/cpp/CMakeLists.txt
 # Minimum required version and project name
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.16)
 project(ZXingWasm)
 
 set(UPSTREAM_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/upstream/zxing-cpp)
@@ -20,9 +20,11 @@ set(ZXING_WRITERS "NEW")
 set(ZXING_EXPERIMENTAL_API ON)
 set(ZXING_USE_BUNDLED_ZINT ON)
 
-# OPTIMIZE
-set(OPT_SIMD ON)
-set(OPT_RELAXED_SIMD ON)
+# Optimizations
+option(OPT_SIMD "Enable WebAssembly SIMD" ON)
+# Emscripten's TypeScript generator lowers relaxed SIMD before running the
+# instrumented module in Node. Keep it opt-in until that path is reliable.
+option(OPT_RELAXED_SIMD "Enable WebAssembly relaxed SIMD" OFF)
 
 
 # Build environment
@@ -100,7 +102,9 @@ if(ZXING_READERS)
   add_executable(zxing_reader ${ENTRYPOINT})
   target_compile_definitions(zxing_reader PRIVATE READER)
   target_link_libraries(zxing_reader ZXing::ZXing )
-  target_link_options(zxing_reader PRIVATE "--emit-tsd" "zxing_reader.d.ts")
+  target_link_options(zxing_reader PRIVATE
+                      "-sEXPORTED_RUNTIME_METHODS=HEAPU8"
+                      "--emit-tsd" "zxing_reader.d.ts")
   set_target_properties(zxing_reader PROPERTIES 
                         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/wasm-out/reader")
 endif()

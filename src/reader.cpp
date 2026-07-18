@@ -38,12 +38,12 @@ public:
     {
         width = 0;
         height = 0;
-        options = ZXing::ReaderOptions().setFormats(ZXing::BarcodeFormat::Any);
+        options = ZXing::ReaderOptions().setFormats(ZXing::BarcodeFormat::All);
     }
     Reader(int width, int height)
     {
         resizeBuf(width, height);
-        options = ZXing::ReaderOptions().setFormats(ZXing::BarcodeFormat::Any);
+        options = ZXing::ReaderOptions().setFormats(ZXing::BarcodeFormat::All);
     }
     inline size_t getBufSize()
     {
