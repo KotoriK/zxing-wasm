@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <type_traits>
+#include "BarcodeFormat.h"
 #include "ReadBarcode.h"
 #include <emscripten/bind.h>
 EMSCRIPTEN_DECLARE_VAL_TYPE(NumberArray);
@@ -34,16 +35,21 @@ class Reader
 public:
     int width;
     int height;
-    Reader()
+    Reader() : Reader(ZXing::BarcodeFormat::All)
+    {
+    }
+    Reader(ZXing::BarcodeFormat format)
     {
         width = 0;
         height = 0;
-        options = ZXing::ReaderOptions().setFormats(ZXing::BarcodeFormat::All);
+        options = ZXing::ReaderOptions().setFormats(format);
     }
-    Reader(int width, int height)
+    Reader(int width, int height) : Reader(width, height, ZXing::BarcodeFormat::All)
+    {
+    }
+    Reader(int width, int height, ZXing::BarcodeFormat format) : Reader(format)
     {
         resizeBuf(width, height);
-        options = ZXing::ReaderOptions().setFormats(ZXing::BarcodeFormat::All);
     }
     inline size_t getBufSize()
     {
@@ -91,6 +97,13 @@ private:
 EMSCRIPTEN_BINDINGS(ZxingReader)
 {
     using namespace emscripten;
+
+    enum_<ZXing::BarcodeFormat>("BarcodeFormat")
+#define ZX_(NAME, SYM, VAR, FLAGS, ZINT, ENABLED, HRI) .value(#NAME, ZXing::BarcodeFormat::NAME)
+        ZX_BCF_LIST(ZX_)
+#undef ZX_
+        ;
+
     register_vector<ZXing::Barcode>("Barcodes");
 
     class_<ZXing::Barcode>("Barcode")
@@ -105,7 +118,9 @@ EMSCRIPTEN_BINDINGS(ZxingReader)
 
     class_<Reader>("Reader")
         .constructor<>()
+        .constructor<ZXing::BarcodeFormat>()
         .constructor<int, int>()
+        .constructor<int, int, ZXing::BarcodeFormat>()
         .property("width", &Reader::width)
         .property("height", &Reader::height)
         .function("resizeBuf", &Reader::resizeBuf)
