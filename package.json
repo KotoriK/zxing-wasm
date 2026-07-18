@@ -30,7 +30,9 @@
     "build:wasm": "bash scripts/build.sh",
     "clean:js": "cmake -E rm -rf dist",
     "build:js": "pnpm run clean:js && tsc",
-    "build": "pnpm run build:wasm && pnpm run build:js"
+    "build": "pnpm run build:wasm && pnpm run build:js",
+    "test:types": "tsc --noEmit --target esnext --module nodenext --moduleResolution nodenext --strict --strictNullChecks false --skipLibCheck tests/barcode-format.test.ts tests/writer-barcode-format.test.ts",
+    "test": "pnpm run test:types && pnpm run build:js && node --test tests/*.test.mjs"
   },
   "keywords": [
     "zxing",

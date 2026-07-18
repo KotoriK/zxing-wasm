@@ -29,3 +29,5 @@ emcmake cmake \
     -DCMAKE_BUILD_TYPE=Release
 
 cmake --build "${BUILD_DIR}" --config Release --parallel
+node "${PROJECT_ROOT}/scripts/enrich_barcode_format_types.js" \
+    "${PROJECT_ROOT}/wasm-out/reader/zxing_reader.d.ts"

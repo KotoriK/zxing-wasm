@@ -97,11 +97,23 @@ add_subdirectory(${UPSTREAM_ROOT}/core ${CMAKE_BINARY_DIR}/ZXing)
 
 # with EMBIND_AOT test code wont be able to be compiled
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s EMBIND_AOT=1")
+
+# Keep exception support on each public WASM module.  These target-scoped
+# options ensure callers can receive C++ exceptions even if global flags are
+# overridden by an embedding build.
+function(enable_wasm_exceptions target)
+  target_compile_options(${target} PRIVATE -fexceptions)
+  target_link_options(${target} PRIVATE
+                      -fexceptions
+                      "-sDISABLE_EXCEPTION_CATCHING=0")
+endfunction()
+
 # Build targets
 if(ZXING_READERS)
   add_executable(zxing_reader ${ENTRYPOINT})
   target_compile_definitions(zxing_reader PRIVATE READER)
   target_link_libraries(zxing_reader ZXing::ZXing )
+  enable_wasm_exceptions(zxing_reader)
   target_link_options(zxing_reader PRIVATE
                       "-sEXPORTED_RUNTIME_METHODS=HEAPU8"
                       "--emit-tsd" "zxing_reader.d.ts")
@@ -113,6 +125,7 @@ if(ZXING_WRITERS MATCHES "NEW")
   add_executable(zxing_writer ${ENTRYPOINT})
   target_compile_definitions(zxing_writer PRIVATE WRITER)
   target_link_libraries(zxing_writer ZXing::ZXing )
+  enable_wasm_exceptions(zxing_writer)
   target_link_options(zxing_writer PRIVATE "--emit-tsd" "zxing_writer.d.ts")
   set_target_properties(zxing_writer PROPERTIES 
                         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/wasm-out/writer")

@@ -3,10 +3,44 @@
 #include "BarcodeFormat.h"
 #include "CreateBarcode.h"
 #include "WriteBarcode.h"
+#include "js-error.h"
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 
 EMSCRIPTEN_DECLARE_VAL_TYPE(ImageResult);
+EMSCRIPTEN_DECLARE_VAL_TYPE(WriterBarcodeFormatArg);
+
+static bool isWritableFormat(ZXing::BarcodeFormat format)
+{
+    switch (format)
+    {
+#define ZX_(NAME, SYM, VAR, FLAGS, ZINT, ENABLED, HRI) \
+    case ZXing::BarcodeFormat::NAME:                    \
+        return (ZINT) != 0 && (ENABLED);
+        ZX_BCF_LIST(ZX_)
+#undef ZX_
+    }
+    return false;
+}
+
+static ZXing::BarcodeFormat parseWriterBarcodeFormat(const WriterBarcodeFormatArg &value)
+{
+    auto description = value.as<std::string>();
+    ZXing::BarcodeFormat format;
+    try
+    {
+        format = ZXing::BarcodeFormatFromString(description);
+    }
+    catch (const std::exception &error)
+    {
+        throwTypeError(error.what());
+    }
+    if (!isWritableFormat(format))
+    {
+        throwTypeError("Barcode format is not writable: '" + description + "'");
+    }
+    return format;
+}
 
 static ZXing::WriterOptions makeWriterOptions(int scale, int rotate, bool withHRT, bool withQuietZones)
 {
@@ -19,18 +53,14 @@ static ZXing::WriterOptions makeWriterOptions(int scale, int rotate, bool withHR
 
 std::string writeBarcodeToSVG(
     const std::string &text,
-    const std::string &format,
+    WriterBarcodeFormatArg format,
     const std::string &creatorOptions,
     int scale,
     int rotate,
     bool withHRT,
     bool withQuietZones)
 {
-    auto barcodeFormat = ZXing::BarcodeFormatFromString(format);
-    if (barcodeFormat == ZXing::BarcodeFormat::None)
-        throw std::invalid_argument("Unsupported format: " + format);
-
-    auto cOpts = ZXing::CreatorOptions(barcodeFormat, creatorOptions);
+    auto cOpts = ZXing::CreatorOptions(parseWriterBarcodeFormat(format), creatorOptions);
     auto barcode = ZXing::CreateBarcodeFromText(text, cOpts);
     auto wOpts = makeWriterOptions(scale, rotate, withHRT, withQuietZones);
     return ZXing::WriteBarcodeToSVG(barcode, wOpts);
@@ -38,18 +68,14 @@ std::string writeBarcodeToSVG(
 
 ImageResult writeBarcodeToImage(
     const std::string &text,
-    const std::string &format,
+    WriterBarcodeFormatArg format,
     const std::string &creatorOptions,
     int scale,
     int rotate,
     bool withHRT,
     bool withQuietZones)
 {
-    auto barcodeFormat = ZXing::BarcodeFormatFromString(format);
-    if (barcodeFormat == ZXing::BarcodeFormat::None)
-        throw std::invalid_argument("Unsupported format: " + format);
-
-    auto cOpts = ZXing::CreatorOptions(barcodeFormat, creatorOptions);
+    auto cOpts = ZXing::CreatorOptions(parseWriterBarcodeFormat(format), creatorOptions);
     auto barcode = ZXing::CreateBarcodeFromText(text, cOpts);
     auto wOpts = makeWriterOptions(scale, rotate, withHRT, withQuietZones);
     auto image = ZXing::WriteBarcodeToImage(barcode, wOpts);
@@ -67,18 +93,14 @@ ImageResult writeBarcodeToImage(
 
 std::string writeBarcodeToUtf8(
     const std::string &text,
-    const std::string &format,
+    WriterBarcodeFormatArg format,
     const std::string &creatorOptions,
     int scale,
     int rotate,
     bool withHRT,
     bool withQuietZones)
 {
-    auto barcodeFormat = ZXing::BarcodeFormatFromString(format);
-    if (barcodeFormat == ZXing::BarcodeFormat::None)
-        throw std::invalid_argument("Unsupported format: " + format);
-
-    auto cOpts = ZXing::CreatorOptions(barcodeFormat, creatorOptions);
+    auto cOpts = ZXing::CreatorOptions(parseWriterBarcodeFormat(format), creatorOptions);
     auto barcode = ZXing::CreateBarcodeFromText(text, cOpts);
     auto wOpts = makeWriterOptions(scale, rotate, withHRT, withQuietZones);
     return ZXing::WriteBarcodeToUtf8(barcode, wOpts);
@@ -87,6 +109,15 @@ std::string writeBarcodeToUtf8(
 EMSCRIPTEN_BINDINGS(ZxingWriter)
 {
     using namespace emscripten;
+
+    auto writerBarcodeFormat = enum_<ZXing::BarcodeFormat>("WriterBarcodeFormat", enum_value_type::string);
+#define ZX_(NAME, SYM, VAR, FLAGS, ZINT, ENABLED, HRI) \
+    if constexpr ((ZINT) != 0 && (ENABLED))             \
+        writerBarcodeFormat.value(#NAME, ZXing::BarcodeFormat::NAME);
+    ZX_BCF_LIST(ZX_)
+#undef ZX_
+
+    register_type<WriterBarcodeFormatArg>("WriterBarcodeFormat");
 
     register_type<ImageResult>("{ width: number; height: number; data: Uint8Array }");
 
