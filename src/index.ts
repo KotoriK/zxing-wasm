@@ -1,5 +1,6 @@
 // export { default as WebGPUBarcodeReader } from './webgpu-reader'
-export { default as BarcodeReader, BarcodeFormats as ReadBarcodeFormats } from './reader.js'
+export { default as BarcodeReader } from './reader.js'
+export type { BarcodeFormats as ReadBarcodeFormats } from './reader.js'
 export { default as BarcodeWriter } from './writer.js'
 export type { WriteBarcodeOptions, BarcodeImage, WriterBarcodeFormat } from './writer.js'
 export { default as createStreamReader } from './stream-reader.js'

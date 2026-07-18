@@ -68,6 +68,15 @@ test('Reader keeps its buffer size in sync with dimensions and channels', async 
     assert.equal(reader.height, 5)
     reader.setChannel(1)
     assert.equal(reader.getBufSize(), 20)
+    reader.prepareBuf(4, 5, 1, 30)
+    assert.equal(reader.getBufSize(), 30)
+    assert.equal(reader.width, 4)
+    assert.equal(reader.height, 5)
+
+    assert.throws(
+        () => reader.prepareBuf(4, 5, 1, 19),
+        (error) => error instanceof TypeError && /smaller/.test(error.message)
+    )
 
     reader.delete()
 

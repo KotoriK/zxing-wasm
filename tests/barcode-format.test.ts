@@ -8,7 +8,8 @@ import type {
 } from '../wasm-out/reader/zxing_reader.js'
 import type {
     BarcodeFormatFlag as PublicBarcodeFormatFlag,
-    BarcodeFormats as PublicBarcodeFormats
+    BarcodeFormats as PublicBarcodeFormats,
+    ReadBarcodeFormats
 } from '../src/index.js'
 
 type Assert<T extends true> = T
@@ -40,6 +41,13 @@ type PublicBarcodeFormatsMatchesGenerated = Assert<
             : false
         : false
 >
+type ReadBarcodeFormatsAliasMatchesGenerated = Assert<
+    ReadBarcodeFormats extends BarcodeFormats
+        ? BarcodeFormats extends ReadBarcodeFormats
+            ? true
+            : false
+        : false
+>
 
 declare const module: MainModule
 declare const reader: Reader
@@ -64,5 +72,6 @@ export type {
     NoneIsNotSelectable,
     PublicFlagTypeIsExported,
     PublicBarcodeFormatsMatchesGenerated,
+    ReadBarcodeFormatsAliasMatchesGenerated,
     ReadBarcodeExportsFormat
 }

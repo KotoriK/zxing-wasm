@@ -6,7 +6,6 @@ import createStreamReader from '../dist/stream-reader.js'
 function makeFixture() {
     let deleted = false
     let closed = false
-    let resized
     const barcodes = {
         delete() {
             deleted = true
@@ -18,14 +17,13 @@ function makeFixture() {
         }
     }
     const track = {
-        getSettings: () => ({ width: 320, height: 240 }),
         stop() {}
     }
     const reader = {
-        resize(width, height) {
-            resized = [width, height]
+        async readVF() {
+            await Promise.resolve()
+            return barcodes
         },
-        readVF: () => barcodes,
         delete() {}
     }
     const stream = { getVideoTracks: () => [track] }
@@ -42,7 +40,7 @@ function makeFixture() {
         barcodes,
         reader,
         stream,
-        state: () => ({ closed, deleted, resized })
+        state: () => ({ closed, deleted })
     }
 }
 
@@ -57,8 +55,7 @@ test('stream reader awaits callback and releases Barcodes afterwards', async () 
 
     assert.deepEqual(fixture.state(), {
         closed: true,
-        deleted: true,
-        resized: [320, 240]
+        deleted: true
     })
 })
 

@@ -163,8 +163,14 @@ public:
         _width = width;
         _height = height;
     }
-    void setChannel(int channel)
+    void prepareBuf(int width, int height, int channel, size_t allocationSize)
     {
+        const auto minimumSize = checkedBufferSize(width, height, channel);
+        if (allocationSize < minimumSize)
+        {
+            throwTypeError("Reader buffer allocation is smaller than the image data");
+        }
+
         ZXing::ImageFormat nextFormat;
         if (channel == 4)
         {
@@ -179,9 +185,15 @@ public:
             throwTypeError("only support RGBA or Lum");
         }
 
-        _buf.resize(checkedBufferSize(_width, _height, channel));
+        _buf.resize(allocationSize);
+        _width = width;
+        _height = height;
         this->channel = channel;
         format = nextFormat;
+    }
+    void setChannel(int channel)
+    {
+        prepareBuf(_width, _height, channel, checkedBufferSize(_width, _height, channel));
     }
 
 private:
@@ -220,6 +232,7 @@ EMSCRIPTEN_BINDINGS(ZxingReader)
     register_vector<ZXing::Barcode>("Barcodes");
 
     class_<ZXing::Barcode>("Barcode")
+        .property("format", &ZXing::Barcode::format)
         .property("ecLevel", &ZXing::Barcode::ecLevel)
         .property("hasECI", &ZXing::Barcode::hasECI);
 
@@ -237,6 +250,7 @@ EMSCRIPTEN_BINDINGS(ZxingReader)
         .property("width", &Reader::getWidth)
         .property("height", &Reader::getHeight)
         .function("resizeBuf", &Reader::resizeBuf)
+        .function("prepareBuf", &Reader::prepareBuf)
         .function("read", &Reader::read)
         .function("getBufOffset", &Reader::getBufOffset) 
         .function("getBufSize", &Reader::getBufSize)
