@@ -1,7 +1,8 @@
-import type { MainModule } from '../wasm-out/writer/zxing_writer.js';
+import type { MainModule, WriterBarcodeFormat } from '../wasm-out/writer/zxing_writer.js';
+export type { WriterBarcodeFormat } from '../wasm-out/writer/zxing_writer.js';
 export interface WriteBarcodeOptions {
-    /** Barcode format string, e.g. "QRCode", "Code128", "EAN13", "DataMatrix" */
-    format: string;
+    /** Writable barcode format, e.g. "QRCode", "Code128", "EAN13", "DataMatrix" */
+    format: WriterBarcodeFormat;
     /** Creator options as a comma-separated key-value string, e.g. "ecLevel=30%" */
     creatorOptions?: string;
     /** Scale factor (module size). Default: 1 */
